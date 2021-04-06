@@ -7,6 +7,7 @@ import numpy as np
 # from skimage.measure import compare_ssim
 # from core.utils import preprocess, metrics
 import lpips
+import torch
 
 # import torch
 
@@ -17,8 +18,8 @@ def train(model, ims, real_input_flag, configs, itr):
 
     cost = model.train(ims, real_input_flag)
     if configs.reverse_input:
-        print(ims.shape)
-        ims_rev = np.flip(ims, axis=1).copy()
+        # print("training with flips!")
+        ims_rev = torch.flip(ims, dims=[1])
         cost += model.train(ims_rev, real_input_flag)
         cost = cost / 2
 

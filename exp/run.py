@@ -83,7 +83,7 @@ parser.add_argument("--sampling_changing_rate", type=float, default=0.00002)
 # optimization
 parser.add_argument("--lr", type=float, default=0.001)
 parser.add_argument("--reverse_input", type=int, default=1)
-parser.add_argument("--batch_size", type=int, default=8)
+parser.add_argument("--batch_size", type=int, default=36)
 parser.add_argument("--max_iterations", type=int, default=80000)
 parser.add_argument("--display_interval", type=int, default=100)
 parser.add_argument("--test_interval", type=int, default=5000)
