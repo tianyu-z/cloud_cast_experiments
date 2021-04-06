@@ -1,5 +1,5 @@
 __author__ = "yunbo"
-
+from comet_ml import Experiment, ExistingExperiment
 import os
 import shutil
 import argparse
@@ -9,6 +9,7 @@ from core.data_provider import datasets_factory
 from core.models.model_factory import Model
 from core.utils import preprocess
 import core.trainer as trainer
+import torch
 
 # -----------------------------------------------------------------------------
 parser = argparse.ArgumentParser(description="PyTorch video prediction model - PredRNN")
@@ -36,10 +37,31 @@ parser.add_argument("--total_length", type=int, default=20)
 parser.add_argument("--img_width", type=int, default=128)
 parser.add_argument("--img_channel", type=int, default=1)
 parser.add_argument("--epochs", type=int, default=10)
-
+parser.add_argument(
+    "-nw", "--num_workers", default=4, type=int, help="number of CPU you get"
+)
+parser.add_argument(
+    "-wp", "--workspace", default="tianyu-z", type=str, help="comet-ml workspace"
+)
+parser.add_argument(
+    "-pn", "--projectname", default="predrnn", type=str, help="comet-ml project name",
+)
+parser.add_argument(
+    "--nocomet", action="store_true", help="not using comet_ml logging."
+)
+parser.add_argument(
+    "--cometid", type=str, default="", help="the comet id to resume exps",
+)
+parser.add_argument(
+    "-rs",
+    "--randomseed",
+    type=int,
+    default=2021,
+    help="batch size for validation. Default: 10.",
+)
 # model
 parser.add_argument("--model_name", type=str, default="predrnn")
-parser.add_argument("--pretrained_model", type=str, default="")
+parser.add_argument("--pretrained_model", type=int, default=0)
 parser.add_argument("--num_hidden", type=str, default="64,64,64,64")
 parser.add_argument("--filter_size", type=int, default=5)
 parser.add_argument("--stride", type=int, default=1)
@@ -75,6 +97,31 @@ parser.add_argument("--visual_path", type=str, default="./decoupling_visual")
 
 args = parser.parse_args()
 print(args)
+
+random_seed = args.randomseed
+np.random.seed(random_seed)
+torch.manual_seed(random_seed)
+if torch.cuda.device_count() > 1:
+    torch.cuda.manual_seed_all(random_seed)
+else:
+    torch.cuda.manual_seed(random_seed)
+torch.backends.cudnn.deterministic = True
+torch.backends.cudnn.benchmark = True
+
+
+if args.pretrained_model:
+    if not args.nocomet:
+        comet_exp = ExistingExperiment(previous_experiment=args.cometid)
+    else:
+        comet_exp = None
+    # load statedict here
+else:
+    # start logging info in comet-ml
+    if not args.nocomet:
+        comet_exp = Experiment(workspace=args.workspace, project_name=args.projectname)
+        # comet_exp.log_parameters(flatten_opts(args))
+    else:
+        comet_exp = None
 
 
 def reserve_schedule_sampling_exp(itr):
@@ -204,8 +251,8 @@ def schedule_sampling(eta, itr):
 
 
 def train_wrapper(model):
-    # if args.pretrained_model:
-    #     model.load(args.pretrained_model)
+    if args.pretrained_model:
+        model.load(args.pretrained_model)
     # load data
     train_input_handle, test_input_handle = datasets_factory.data_provider(
         args.dataset_name,
@@ -255,7 +302,10 @@ def cloud_cast_wrapper(model):
         batchsize=args.batch_size,
     )
     trainLoader = torch.utils.data.DataLoader(
-        trainFolder, batch_size=args.batch_size, num_workers=0, shuffle=False
+        trainFolder,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+        shuffle=False,
     )
     # device may need to change
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -266,7 +316,7 @@ def cloud_cast_wrapper(model):
             if args.reverse_scheduled_sampling == 1:
                 real_input_flag = reserve_schedule_sampling_exp(i)
             ims = preprocess.reshape_patch(inputs.cpu(), args.patch_size)
-            trainer.train(model, ims, real_input_flag, args, idx)
+            trainer.train(model, ims, real_input_flag, args, i)
     if epoch % args.snapshot_interval == 0:
         model.save(epoch)
 

@@ -1,26 +1,30 @@
-#import os.path
+# import os.path
 import datetime
-#import cv2
-import numpy as np
-#from skimage.measure import compare_ssim
-#from core.utils import preprocess, metrics
-import lpips
-#import torch
 
-loss_fn_alex = lpips.LPIPS(net='alex')
+# import cv2
+import numpy as np
+
+# from skimage.measure import compare_ssim
+# from core.utils import preprocess, metrics
+import lpips
+
+# import torch
+
+loss_fn_alex = lpips.LPIPS(net="alex")
 
 
 def train(model, ims, real_input_flag, configs, itr):
 
     cost = model.train(ims, real_input_flag)
     if configs.reverse_input:
+        print(ims.shape)
         ims_rev = np.flip(ims, axis=1).copy()
         cost += model.train(ims_rev, real_input_flag)
         cost = cost / 2
 
     if itr % configs.display_interval == 0:
-        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), 'itr: ' + str(itr))
-        print('training loss: ' + str(cost))
+        print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), "itr: " + str(itr))
+        print("training loss: " + str(cost))
 
 
 # def test(model, test_input_handle, configs, itr):
