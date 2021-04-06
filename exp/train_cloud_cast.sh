@@ -2,9 +2,8 @@
 source /Users/luciaeve/PycharmProjects/predrnn-pytorch/venv/bin/activate
 
 python -u run.py \
-    --epochs 10 \
+    --epochs 200 \
     --is_training 1 \
-    --device cpu \
     --dataset_name cloud_cast \
     --save_dir checkpoints/cloud_cast_predrnn \
     --gen_frm_dir results/cloud_cast_predrnn \
@@ -25,8 +24,8 @@ python -u run.py \
     --r_sampling_step_2 50000 \
     --r_exp_alpha 2500 \
     --lr 0.0001 \
-    --batch_size 8 \
+    --batch_size 256 \
     --max_iterations 80000 \
-    --display_interval 100 \
-    --test_interval 5000 \
-    --snapshot_interval 5000 \
+    --display_interval 1 \
+    --test_interval 1 \
+    --snapshot_interval 5

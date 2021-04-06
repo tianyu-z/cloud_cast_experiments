@@ -12,14 +12,14 @@ import pickle
 #     pickle.dump(object, file)
 
 default_data_path = {
-    "200MB": "/Users/luciaeve/Desktop/",
+    "200MB": "/miniscratch/tyz/datasets/CloudCast/200MB/pkls/",
     "8GB": "/miniscratch/tyz/datasets/CloudCast/8GB/pkls/",
 }
 
 
 def load_cs_small(root=default_data_path):
-    path_train = os.path.join(root["200MB"], "data.pkl")
-    path_test = os.path.join(root["200MB"], "data.pkl")
+    path_train = os.path.join(root["200MB"], "train.pkl")
+    path_test = os.path.join(root["200MB"], "test.pkl")
     with open(path_train, "rb") as file:
         data_train = pickle.load(file)
         data_train = data_train
