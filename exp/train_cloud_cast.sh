@@ -1,14 +1,15 @@
 # activate your virtualenv > will need to change!
-source /Users/luciaeve/PycharmProjects/predrnn-pytorch/venv/bin/activate
+
 
 python -u run.py \
+    --workspace tianyu-z \
     --epochs 200 \
     --is_training 1 \
     --dataset_name cloud_cast \
     --save_dir checkpoints/cloud_cast_predrnn \
     --gen_frm_dir results/cloud_cast_predrnn \
     --model_name predrnn_memory_decoupling \
-    --reverse_input 1 \
+    --reverse_input 0 \
     --img_width 128 \
     --img_channel 1 \
     --input_length 10 \
@@ -24,8 +25,9 @@ python -u run.py \
     --r_sampling_step_2 50000 \
     --r_exp_alpha 2500 \
     --lr 0.0001 \
-    --batch_size 256 \
+    --batch_size 36 \
     --max_iterations 80000 \
     --display_interval 1 \
     --test_interval 1 \
-    --snapshot_interval 5
+    --snapshot_interval 5 \
+    -nbv 3
