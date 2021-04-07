@@ -272,8 +272,8 @@ def schedule_sampling(eta, itr):
 def test(model, configs, itr, loader):
 
     loss_fn_alex = lpips.LPIPS(net="alex").to(args.device)
-    res_path = os.path.join(configs.gen_frm_dir, str(itr))
-    os.mkdir(res_path)
+    # res_path = os.path.join(configs.gen_frm_dir, str(itr))
+    # os.mkdir(res_path)
     avg_mse = 0
     batch_id = 0
     img_mse, ssim, psnr = [], [], []
