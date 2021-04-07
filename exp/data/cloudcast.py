@@ -82,7 +82,7 @@ class CloudCast(data.Dataset):
         else:  # avoid getting errors when the rest of the data is not enough for a batch
             diff = self.length - idx
             slice = cloudcast[:, :, -diff - self.n_frames_total : -diff]
-        slice = slice.reshape((-1, 1, H, W))
+        slice = slice.reshape((-1, H, W, 1))
         return slice
 
     def __getitem__(self, idx):
@@ -96,11 +96,12 @@ class CloudCast(data.Dataset):
             ]  # avoid error when the rest of the data is not enough for an output with len of n_frames_output
         else:
             output = []
-        frozen = input[-1]
+        # frozen = input[-1]
         output = torch.from_numpy(output / self.max_pxl_value).contiguous().float()
         input = torch.from_numpy(input / self.max_pxl_value).contiguous().float()
-        out = [idx, output, input, frozen, np.zeros(1)]
+        out = torch.cat((input, output), dim=0)
         return out
+        # return input
 
     def __len__(self):
         return self.length
